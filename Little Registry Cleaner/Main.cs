@@ -195,7 +195,8 @@ namespace Little_Registry_Cleaner
                 }
 
                 // Generate a restore file and delete keys & values
-                xmlReg.deleteAsXml(arrBadRegKeys, strBackupFile);
+                int successCount, failCount;
+                xmlReg.deleteAsXml(arrBadRegKeys, strBackupFile, out successCount, out failCount);
 
                 SysRestore.EndRestore(lSeqNum);
 
@@ -210,7 +211,10 @@ namespace Little_Registry_Cleaner
 
                 // Display message box
                 if (!Properties.Settings.Default.bOptionsAutoExit)
+                {
+                    Main.Logger.WriteLine(string.Format("Problems resolved: {0} deleted, {1} failed/skipped.", successCount, failCount));
                     MessageBox.Show(this, Properties.Resources.mainProblemsRemoved, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
 
                 // Clear old results
                 this.treeModel.Nodes.Clear();

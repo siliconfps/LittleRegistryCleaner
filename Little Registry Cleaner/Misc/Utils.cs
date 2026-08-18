@@ -1084,7 +1084,7 @@ namespace Little_Registry_Cleaner
         }
 
         /// <summary>
-        /// Checks if we have permission to delete a registry key
+        /// Checks if we have permission to delete a registry key and all its subkeys
         /// </summary>
         /// <param name="key">Registry key</param>
         /// <returns>True if we can delete it</returns>
@@ -1097,21 +1097,16 @@ namespace Little_Registry_Cleaner
             {
                 if (key.SubKeyCount > 0)
                 {
-                    bool ret = true;
-
                     foreach (string subKey in key.GetSubKeyNames())
                     {
-                        using (RegistryKey sub = key.OpenSubKey(subKey, false))
+                        using (RegistryKey sub = key.OpenSubKey(subKey, true))
                         {
-                            if (sub != null && !CanDeleteKey(sub))
+                            if (sub == null || !CanDeleteKey(sub))
                             {
-                                ret = false;
-                                break;
+                                return false;
                             }
                         }
                     }
-
-                    return ret;
                 }
 
                 return true;
@@ -1121,6 +1116,59 @@ namespace Little_Registry_Cleaner
                 return false;
             }
         }
+
+        /// <summary>
+        /// Checks if we have permission to delete a registry key
+        /// </summary>
+        /// <param name="baseKey">Base hive</param>
+        /// <param name="subKey">Sub key path</param>
+        /// <returns>True if we have write/delete permission</returns>
+        public static bool CanDeleteKey(string baseKey, string subKey)
+        {
+            if (string.IsNullOrEmpty(baseKey) || string.IsNullOrEmpty(subKey))
+                return false;
+
+            try
+            {
+                using (RegistryKey rk = RegOpenKey(baseKey, subKey, true))
+                {
+                    if (rk == null)
+                        return false;
+
+                    return CanDeleteKey(rk);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if we have permission to delete a registry value
+        /// </summary>
+        /// <param name="baseKey">Base hive</param>
+        /// <param name="subKey">Sub key path</param>
+        /// <param name="valueName">Value name</param>
+        /// <returns>True if we have write permission to delete the value</returns>
+        public static bool CanDeleteValue(string baseKey, string subKey, string valueName)
+        {
+            if (string.IsNullOrEmpty(baseKey) || string.IsNullOrEmpty(subKey))
+                return false;
+
+            try
+            {
+                using (RegistryKey rk = RegOpenKey(baseKey, subKey, true))
+                {
+                    return (rk != null);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
 
     }
 }

@@ -269,10 +269,15 @@ namespace Little_Registry_Cleaner
                 if (!Utils.ValueNameExists(baseKey, subKey, valueName))
                     return false;
 
-            // Make sure we have the correct permissions for the registry key
-            using (RegistryKey rk = Utils.RegOpenKey(baseKey, subKey))
+            // Make sure we have the correct permissions for the registry key / value
+            if (!string.IsNullOrEmpty(valueName))
             {
-                if (rk == null || !Utils.CanDeleteKey(rk))
+                if (!Utils.CanDeleteValue(baseKey, subKey, valueName))
+                    return false;
+            }
+            else
+            {
+                if (!Utils.CanDeleteKey(baseKey, subKey))
                     return false;
             }
 

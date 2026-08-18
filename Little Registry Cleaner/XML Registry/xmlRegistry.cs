@@ -1201,8 +1201,18 @@ namespace Little_Registry_Cleaner.Xml
         /// <param name="arrBadRegistryKeys">Array containg bad registry keys</param>
         /// <param name="strBackupFile">Path to XML backup file</param>
         /// <returns>True if file was created</returns>
-        public bool deleteAsXml(BadRegKeyArray arrBadRegistryKeys, string strBackupFile)
+        /// <summary>
+        /// Deletes registry problems and generates XML backup
+        /// </summary>
+        /// <param name="arrBadRegistryKeys">Array containing bad registry keys</param>
+        /// <param name="strBackupFile">Path to XML backup file</param>
+        /// <param name="successCount">Number of successfully deleted items</param>
+        /// <param name="failCount">Number of items that failed to delete</param>
+        /// <returns>True if backup file was created</returns>
+        public bool deleteAsXml(BadRegKeyArray arrBadRegistryKeys, string strBackupFile, out int successCount, out int failCount)
         {
+            successCount = 0;
+            failCount = 0;
             xmlWriter w = new xmlWriter();
 
             // Write opening tags to Backup File
@@ -1218,7 +1228,14 @@ namespace Little_Registry_Cleaner.Xml
                     this.saveAsXml(w, false, p.RegKeyPath, p.ValueName, p.Problem);
 
                 // Remove problem from registry
-                deleteRegistryKey(p.baseRegKey, p.subRegKey, p.ValueName);
+                if (deleteRegistryKey(p.baseRegKey, p.subRegKey, p.ValueName))
+                {
+                    successCount++;
+                }
+                else
+                {
+                    failCount++;
+                }
             }
 
             // Write Closing Tag to Backup File
@@ -1226,6 +1243,12 @@ namespace Little_Registry_Cleaner.Xml
             w.close();
 
             return true;
+        }
+
+        public bool deleteAsXml(BadRegKeyArray arrBadRegistryKeys, string strBackupFile)
+        {
+            int success, fail;
+            return deleteAsXml(arrBadRegistryKeys, strBackupFile, out success, out fail);
         }
 
         /// <summary>
@@ -1237,26 +1260,92 @@ namespace Little_Registry_Cleaner.Xml
         /// <returns>True if it was removed</returns>
         bool deleteRegistryKey(string strBaseKey, string strSubKey, string strLimitValue)
         {
+            bool bSuccess = false;
             try
             {
+                string upperBase = (strBaseKey ?? "").ToUpper();
+
                 if (!string.IsNullOrEmpty(strLimitValue))
                 {
+                    // If HKCR, try deleting from HKCU\Software\Classes and HKLM\Software\Classes first
+                    if (upperBase == "HKEY_CLASSES_ROOT" || upperBase == "HKCR")
+                    {
+                        try
+                        {
+                            using (RegistryKey rk = Utils.RegOpenKey("HKEY_CURRENT_USER", "Software\\Classes\\" + strSubKey, true))
+                            {
+                                if (rk != null && rk.GetValue(strLimitValue) != null)
+                                {
+                                    rk.DeleteValue(strLimitValue, false);
+                                    rk.Flush();
+                                    bSuccess = true;
+                                }
+                            }
+                        }
+                        catch { }
+
+                        try
+                        {
+                            using (RegistryKey rk = Utils.RegOpenKey("HKEY_LOCAL_MACHINE", "Software\\Classes\\" + strSubKey, true))
+                            {
+                                if (rk != null && rk.GetValue(strLimitValue) != null)
+                                {
+                                    rk.DeleteValue(strLimitValue, false);
+                                    rk.Flush();
+                                    bSuccess = true;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+
                     using (RegistryKey regKey = Utils.RegOpenKey(strBaseKey, strSubKey, true))
                     {
                         if (regKey != null)
                         {
                             regKey.DeleteValue(strLimitValue, false);
                             regKey.Flush();
-                            return true;
+                            bSuccess = true;
                         }
                     }
-                    return false;
+
+                    return bSuccess;
                 }
                 else
                 {
-                    RegistryKey reg = null;
+                    // Deleting subkey tree
+                    if (upperBase == "HKEY_CLASSES_ROOT" || upperBase == "HKCR")
+                    {
+                        try
+                        {
+                            using (RegistryKey rkClasses = Registry.CurrentUser.OpenSubKey("Software\\Classes", true))
+                            {
+                                if (rkClasses != null)
+                                {
+                                    rkClasses.DeleteSubKeyTree(strSubKey, false);
+                                    rkClasses.Flush();
+                                    bSuccess = true;
+                                }
+                            }
+                        }
+                        catch { }
 
-                    string upperBase = (strBaseKey ?? "").ToUpper();
+                        try
+                        {
+                            using (RegistryKey rkClasses = Registry.LocalMachine.OpenSubKey("Software\\Classes", true))
+                            {
+                                if (rkClasses != null)
+                                {
+                                    rkClasses.DeleteSubKeyTree(strSubKey, false);
+                                    rkClasses.Flush();
+                                    bSuccess = true;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+
+                    RegistryKey reg = null;
                     if (upperBase == "HKEY_CLASSES_ROOT" || upperBase == "HKCR")
                         reg = Registry.ClassesRoot;
                     else if (upperBase == "HKEY_CURRENT_USER" || upperBase == "HKCU")
@@ -1268,24 +1357,34 @@ namespace Little_Registry_Cleaner.Xml
                     else if (upperBase == "HKEY_CURRENT_CONFIG" || upperBase == "HKCC")
                         reg = Registry.CurrentConfig;
                     else
-                        return false;
+                        return bSuccess;
 
                     if (reg != null && !string.IsNullOrEmpty(strSubKey))
                     {
-                        reg.DeleteSubKeyTree(strSubKey, false);
-                        reg.Flush();
-                        return true;
+                        try
+                        {
+                            reg.DeleteSubKeyTree(strSubKey, false);
+                            reg.Flush();
+                            bSuccess = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (!bSuccess)
+                                throw ex;
+                        }
                     }
+
+                    return bSuccess;
                 }
             }
             catch (Exception e)
             {
+                Main.Logger.WriteLine(string.Format("Failed to delete registry item: {0}\\{1} (Value: {2}) - Reason: {3}", strBaseKey, strSubKey, strLimitValue, e.Message));
                 ShowErrorMessage(e, "Error deleting registry key or value");
                 return false;
             }
-
-            return true;
         }
+
 
         /// <summary>
         /// Throws exception in debug mode
