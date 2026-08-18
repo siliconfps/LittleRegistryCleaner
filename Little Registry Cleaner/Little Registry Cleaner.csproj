@@ -284,11 +284,12 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
+    <Delete Files="$(TargetDir)mscorlib.dll" Condition="Exists('$(TargetDir)mscorlib.dll')" />
+    <Delete Files="$(TargetDir)normidna.nlp" Condition="Exists('$(TargetDir)normidna.nlp')" />
+    <Delete Files="$(TargetDir)normnfc.nlp" Condition="Exists('$(TargetDir)normnfc.nlp')" />
+    <Delete Files="$(TargetDir)normnfd.nlp" Condition="Exists('$(TargetDir)normnfd.nlp')" />
+    <Delete Files="$(TargetDir)normnfkc.nlp" Condition="Exists('$(TargetDir)normnfkc.nlp')" />
+    <Delete Files="$(TargetDir)normnfkd.nlp" Condition="Exists('$(TargetDir)normnfkd.nlp')" />
   </Target>
-  -->
 </Project>
