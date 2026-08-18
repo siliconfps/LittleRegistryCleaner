@@ -719,101 +719,131 @@ namespace Little_Registry_Cleaner
             {
                 case "en":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["englishToolStripMenuItem"];
+                    ci = new CultureInfo("en");
                     break;
 
                 case "es":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["spanishToolStripMenuItem"];
+                    ci = new CultureInfo("es");
                     break;
 
                 case "ar":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["arabicToolStripMenuItem"];
+                    ci = new CultureInfo("ar");
                     break;
 
                 case "de":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["germanToolStripMenuItem"];
+                    ci = new CultureInfo("de");
                     break;
 
                 case "el":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["greekToolStripMenuItem"];
+                    ci = new CultureInfo("el");
                     break;
 
                 case "fr":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["frenchToolStripMenuItem"];
+                    ci = new CultureInfo("fr");
                     break;
 
                 case "it":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["italianToolStripMenuItem"];
+                    ci = new CultureInfo("it");
                     break;
 
                 case "ja":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["japaneseToolStripMenuItem"];
+                    ci = new CultureInfo("ja");
                     break;
 
                 case "nl":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["dutchToolStripMenuItem"];
+                    ci = new CultureInfo("nl");
                     break;
 
                 case "pt":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["portugueseToolStripMenuItem"];
+                    ci = new CultureInfo("pt");
                     break;
 
                 case "ru":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["russianToolStripMenuItem"];
+                    ci = new CultureInfo("ru");
                     break;
 
                 case "pl":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["polishToolStripMenuItem"];
+                    ci = new CultureInfo("pl");
                     break;
 
                 case "sv":
-                    {
-                        CultureInfo cultureInfo = new CultureInfo("sv-SE");
-                        Thread.CurrentThread.CurrentUICulture = cultureInfo;
-                        Scanners.Strings.Culture = cultureInfo;
-                        Properties.Resources.Culture = cultureInfo;
-
-                        lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["swedishToolStripMenuItem"];
-                    }
+                    lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["swedishToolStripMenuItem"];
+                    ci = new CultureInfo("sv-SE");
                     break;
 
                 case "th":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["thaiToolStripMenuItem"];
+                    ci = new CultureInfo("th");
                     break;
 
                 case "vi":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["vietnameseToolStripMenuItem"];
+                    ci = new CultureInfo("vi");
                     break;
 
                 case "hu":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["hungarianToolStripMenuItem"];
+                    ci = new CultureInfo("hu");
                     break;
 
                 case "tr":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["turkishToolStripMenuItem"];
+                    ci = new CultureInfo("tr");
                     break;
 
                 case "lt":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["lithuanianToolStripMenuItem"];
+                    ci = new CultureInfo("lt");
                     break;
 
                 case "fa":
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["persianToolStripMenuItem"];
+                    ci = new CultureInfo("fa");
                     break;
 
                 case "zh":
+                    if (ci.Name == "zh-CHS" || ci.Name == "zh-CN" || ci.Name == "zh-Hans" || ci.EnglishName.Contains("Simplified"))
                     {
-                        if (ci.EnglishName == "Chinese (Simplified)")
-                            lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["chineseSimplifiedToolStripMenuItem"];
-                        else // Chinese (Traditional)
-                            lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["chineseTraditionalToolStripMenuItem"];
+                        lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["chineseSimplifiedToolStripMenuItem"];
+                        ci = new CultureInfo("zh-CHS");
+                    }
+                    else
+                    {
+                        lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["chineseTraditionalToolStripMenuItem"];
+                        ci = new CultureInfo("zh-CHT");
                     }
                     break;
+
                 default:
                     lang = (ToolStripMenuItem)this.languageToolStripMenuItem.DropDownItems["englishToolStripMenuItem"];
+                    ci = new CultureInfo("en");
                     break;
             }
 
-            lang.Checked = true;
+            if (ci.Name == "zh-CHS")
+                Application.CurrentCulture = new CultureInfo(0x0804);
+            else if (ci.Name == "zh-CHT")
+                Application.CurrentCulture = new CultureInfo(0x0404);
+            else
+                Application.CurrentCulture = CultureInfo.CreateSpecificCulture(ci.Name);
+
+            Thread.CurrentThread.CurrentUICulture = ci;
+            Scanners.Strings.Culture = ci;
+            Properties.Resources.Culture = ci;
+
+            if (lang != null)
+                lang.Checked = true;
 
             this.ReloadControls();
         }
@@ -825,53 +855,61 @@ namespace Little_Registry_Cleaner
         {
             ResourceManager resources = new ResourceManager(typeof(Main));
 
-            this.Text = resources.GetString("$this.Text");
-            this.aboutToolStripMenuItem.Text = resources.GetString("aboutToolStripMenuItem.Text");
-            this.aboutToolStripMenuItem1.Text = resources.GetString("aboutToolStripMenuItem1.Text");
-            this.checkForUpdatesToolStripMenuItem.Text = resources.GetString("checkForUpdatesToolStripMenuItem.Text");
-            this.editToolStripMenuItem.Text = resources.GetString("editToolStripMenuItem.Text");
-            this.excludeSelectedToolStripMenuItem.Text = resources.GetString("excludeSelectedToolStripMenuItem.Text");
-            this.excludeSelectedToolStripMenuItem1.Text = resources.GetString("excludeSelectedToolStripMenuItem1.Text");
-            this.exitToolStripMenuItem.Text = resources.GetString("exitToolStripMenuItem.Text");
-            this.fileToolStripMenuItem.Text = resources.GetString("fileToolStripMenuItem.Text");
-            this.fixToolStripMenuItem.Text = resources.GetString("fixToolStripMenuItem.Text");
-            this.helpToolStripMenuItem.Text = resources.GetString("helpToolStripMenuItem.Text");
-            this.helpToolStripMenuItem1.Text = resources.GetString("helpToolStripMenuItem1.Text");
-            this.hideShowToolStripMenuItem.Text = resources.GetString("hideShowToolStripMenuItem.Text");
-            this.languageToolStripMenuItem.Text = resources.GetString("languageToolStripMenuItem.Text");
-            this.notifyIcon1.Text = resources.GetString("notifyIcon1.Text");
-            this.restoreToolStripMenuItem.Text = resources.GetString("restoreToolStripMenuItem.Text");
-            this.scanToolStripMenuItem.Text = resources.GetString("scanToolStripMenuItem.Text");
-            this.selectAllToolStripMenuItem.Text = resources.GetString("selectAllToolStripMenuItem.Text");
-            this.selectAllToolStripMenuItem1.Text = resources.GetString("selectAllToolStripMenuItem1.Text");
-            this.selectNoneToolStripMenuItem.Text = resources.GetString("selectNoneToolStripMenuItem.Text");
-            this.selectNoneToolStripMenuItem1.Text = resources.GetString("selectNoneToolStripMenuItem1.Text");
-            this.startupManagerToolStripMenuItem.Text = resources.GetString("startupManagerToolStripMenuItem.Text");
-            this.toolsToolStripMenuItem.Text = resources.GetString("toolsToolStripMenuItem.Text");
-            this.toolStripButtonFix.Text = resources.GetString("toolStripButtonFix.Text");
-            this.toolStripButtonHelp.Text = resources.GetString("toolStripButtonHelp.Text");
-            this.toolStripButtonRestore.Text = resources.GetString("toolStripButtonRestore.Text");
-            this.toolStripButtonScan.Text = resources.GetString("toolStripButtonScan.Text");
-            this.toolStripButtonSettings.Text = resources.GetString("toolStripButtonSettings.Text");
-            this.toolStripMenuItemOptions.Text = resources.GetString("toolStripMenuItemOptions.Text");
-            this.treeColumn1.Header = resources.GetString("treeColumn1.Header");
-            this.treeColumn2.Header = resources.GetString("treeColumn2.Header");
-            this.treeColumn3.Header = resources.GetString("treeColumn3.Header");
-            this.uninstallManagerToolStripMenuItem.Text = resources.GetString("uninstallManagerToolStripMenuItem.Text");
-            this.viewInRegeditToolStripMenuItem.Text = resources.GetString("viewInRegeditToolStripMenuItem.Text");
-            this.viewInRegeditToolStripMenuItem1.Text = resources.GetString("viewInRegeditToolStripMenuItem1.Text");
-            this.visitWebsiteToolStripMenuItem.Text = resources.GetString("visitWebsiteToolStripMenuItem.Text");
+            string text;
+            if ((text = resources.GetString("$this.Text")) != null) this.Text = text;
+            if ((text = resources.GetString("aboutToolStripMenuItem.Text")) != null) this.aboutToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("aboutToolStripMenuItem1.Text")) != null) this.aboutToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("checkForUpdatesToolStripMenuItem.Text")) != null) this.checkForUpdatesToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("editToolStripMenuItem.Text")) != null) this.editToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("excludeSelectedToolStripMenuItem.Text")) != null) this.excludeSelectedToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("excludeSelectedToolStripMenuItem1.Text")) != null) this.excludeSelectedToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("exitToolStripMenuItem.Text")) != null) this.exitToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("fileToolStripMenuItem.Text")) != null) this.fileToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("fixToolStripMenuItem.Text")) != null) this.fixToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("helpToolStripMenuItem.Text")) != null) this.helpToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("helpToolStripMenuItem1.Text")) != null) this.helpToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("hideShowToolStripMenuItem.Text")) != null) this.hideShowToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("languageToolStripMenuItem.Text")) != null) this.languageToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("notifyIcon1.Text")) != null) this.notifyIcon1.Text = text;
+            if ((text = resources.GetString("restoreToolStripMenuItem.Text")) != null) this.restoreToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("scanToolStripMenuItem.Text")) != null) this.scanToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("selectAllToolStripMenuItem.Text")) != null) this.selectAllToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("selectAllToolStripMenuItem1.Text")) != null) this.selectAllToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("selectNoneToolStripMenuItem.Text")) != null) this.selectNoneToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("selectNoneToolStripMenuItem1.Text")) != null) this.selectNoneToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("startupManagerToolStripMenuItem.Text")) != null) this.startupManagerToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("toolsToolStripMenuItem.Text")) != null) this.toolsToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("toolStripButtonFix.Text")) != null) this.toolStripButtonFix.Text = text;
+            if ((text = resources.GetString("toolStripButtonHelp.Text")) != null) this.toolStripButtonHelp.Text = text;
+            if ((text = resources.GetString("toolStripButtonRestore.Text")) != null) this.toolStripButtonRestore.Text = text;
+            if ((text = resources.GetString("toolStripButtonScan.Text")) != null) this.toolStripButtonScan.Text = text;
+            if ((text = resources.GetString("toolStripButtonSettings.Text")) != null) this.toolStripButtonSettings.Text = text;
+            if ((text = resources.GetString("toolStripMenuItemOptions.Text")) != null) this.toolStripMenuItemOptions.Text = text;
+            if ((text = resources.GetString("treeColumn1.Header")) != null) this.treeColumn1.Header = text;
+            if ((text = resources.GetString("treeColumn2.Header")) != null) this.treeColumn2.Header = text;
+            if ((text = resources.GetString("treeColumn3.Header")) != null) this.treeColumn3.Header = text;
+            if ((text = resources.GetString("uninstallManagerToolStripMenuItem.Text")) != null) this.uninstallManagerToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("viewInRegeditToolStripMenuItem.Text")) != null) this.viewInRegeditToolStripMenuItem.Text = text;
+            if ((text = resources.GetString("viewInRegeditToolStripMenuItem1.Text")) != null) this.viewInRegeditToolStripMenuItem1.Text = text;
+            if ((text = resources.GetString("visitWebsiteToolStripMenuItem.Text")) != null) this.visitWebsiteToolStripMenuItem.Text = text;
 
             if ((string)this.toolStripStatusLabel1.Tag == "mainScanningFinished")
                 this.toolStripStatusLabel1.Text = Properties.Resources.mainScanningFinished;
             else if ((string)this.toolStripStatusLabel1.Tag == "mainScanningAborted")
                 this.toolStripStatusLabel1.Text = Properties.Resources.mainScanningAborted;
             else
-                this.toolStripStatusLabel1.Text = resources.GetString("toolStripStatusLabel1.Text");
+            {
+                if ((text = resources.GetString("toolStripStatusLabel1.Text")) != null)
+                    this.toolStripStatusLabel1.Text = text;
+            }
 
-            this.treeView1.Nodes.Clear();
-            this.treeView1.Nodes.Add(resources.GetObject("treeView1.Nodes") as TreeNode);
-            this.treeView1.ExpandAll();
+            TreeNode treeNode = resources.GetObject("treeView1.Nodes") as TreeNode;
+            if (treeNode != null)
+            {
+                this.treeView1.Nodes.Clear();
+                this.treeView1.Nodes.Add(treeNode);
+                this.treeView1.ExpandAll();
+            }
         }
     }
 }

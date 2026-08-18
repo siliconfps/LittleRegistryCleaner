@@ -6,6 +6,8 @@
 x64/
 x86/
 [Bb]uild/
+[Oo]utput/
+[Dd]ist/
 
 ## Compiled Binaries & Symbols
 *.dll
