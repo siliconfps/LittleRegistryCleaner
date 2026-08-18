@@ -1,0 +1,36 @@
+## Build and Output Folders
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+
+## Compiled Binaries & Symbols
+*.dll
+*.exe
+*.pdb
+*.suo
+*.user
+*.userprefs
+*.userosscache
+*.sln.docstates
+*.vsp
+*.vspx
+*.vspscc
+*.vssscc
+*.cache
+*.FileListAbsolute.txt
+*.log
+
+## Visual Studio Temporary Files
+.vs/
+_ReSharper*/
+*.rsuser
+*.DotSettings.user
+
+## OS Generated Files
+.DS_Store
+Thumbs.db
+Desktop.ini

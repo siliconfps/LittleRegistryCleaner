@@ -1,0 +1,14 @@
+1. Set Project Configuration to Release
+2. Make sure version is set right
+3. Build solution
+4. Build resources and copy them to nsis directory
+5. Compile seperate builds for portable edition and NSIS
+6. Copy executable and configuration to NSIS directory and PE directory
+7. Update changes in changelog.txt, Little Registry Cleaner.chm and website
+8. If files are added, make sure NSIS file is updated
+9. Compile and test NSIS
+10. Compress source code using zip (example: Little_Registry_Cleaner_Source_mm_dd_yyyy.zip)
+11. Remove output and bazaar directories from zip file
+12. Add Files and commit build to bazaar vcs
+13. Upload source code and compiled NSIS to sourceforge
+14. Update update.xml on sourceforge site
